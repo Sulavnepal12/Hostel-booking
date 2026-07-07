@@ -52,6 +52,9 @@ def update_room(room_id):
         return jsonify({"error": "Room not found"}), 404
 
     data = request.get_json()
+    if not data:
+        return jsonify({"error": "No input data provided"}), 400
+
     room.room_number = data.get("room_number", room.room_number)
     room.room_type = data.get("room_type", room.room_type)
     room.capacity = data.get("capacity", room.capacity)
@@ -61,3 +64,14 @@ def update_room(room_id):
     db.session.commit()
 
     return jsonify({"message": "Room updated successfully", "id": room.id}), 200
+
+
+def delete_room(room_id):
+    room = Room.query.get(room_id)
+    if not room:
+        return jsonify({"error": "Room not found"}), 404
+
+    db.session.delete(room)
+    db.session.commit()
+
+    return jsonify({"message": "Room deleted successfully"}), 200
