@@ -53,9 +53,8 @@ def update_hostel(hostel_id):
 
     data = request.get_json()
     if not data:
-        return jsonify({"error": "No input data provided"}), 400, 404
+        return jsonify({"error": "No input data provided"}), 400
 
-    data = request.get_json()
     hostel.name = data.get("name", hostel.name)
     hostel.location = data.get("location", hostel.location)
     hostel.price_per_bed = data.get("price_per_bed", hostel.price_per_bed)
@@ -65,3 +64,14 @@ def update_hostel(hostel_id):
     db.session.commit()
 
     return jsonify({"message": "Hostel updated successfully", "id": hostel.id}), 200
+
+
+def delete_hostel(hostel_id):
+    hostel = Hostel.query.get(hostel_id)
+    if not hostel:
+        return jsonify({"error": "Hostel not found"}), 404
+
+    db.session.delete(hostel)
+    db.session.commit()
+
+    return jsonify({"message": "Hostel deleted successfully"}), 200
