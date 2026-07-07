@@ -44,3 +44,20 @@ def get_room_by_id(room_id):
         "is_available": room.is_available,
         "hostel_id": room.hostel_id
     }), 200
+
+
+def update_room(room_id):
+    room = Room.query.get(room_id)
+    if not room:
+        return jsonify({"error": "Room not found"}), 404
+
+    data = request.get_json()
+    room.room_number = data.get("room_number", room.room_number)
+    room.room_type = data.get("room_type", room.room_type)
+    room.capacity = data.get("capacity", room.capacity)
+    room.is_available = data.get("is_available", room.is_available)
+    room.hostel_id = data.get("hostel_id", room.hostel_id)
+
+    db.session.commit()
+
+    return jsonify({"message": "Room updated successfully", "id": room.id}), 200
