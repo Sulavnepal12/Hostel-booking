@@ -44,3 +44,20 @@ def get_hostel_by_id(hostel_id):
         "amenities": hostel.amenities,
         "total_rooms": hostel.total_rooms
     }), 200
+
+
+def update_hostel(hostel_id):
+    hostel = Hostel.query.get(hostel_id)
+    if not hostel:
+        return jsonify({"error": "Hostel not found"}), 404
+
+    data = request.get_json()
+    hostel.name = data.get("name", hostel.name)
+    hostel.location = data.get("location", hostel.location)
+    hostel.price_per_bed = data.get("price_per_bed", hostel.price_per_bed)
+    hostel.amenities = data.get("amenities", hostel.amenities)
+    hostel.total_rooms = data.get("total_rooms", hostel.total_rooms)
+
+    db.session.commit()
+
+    return jsonify({"message": "Hostel updated successfully", "id": hostel.id}), 200
