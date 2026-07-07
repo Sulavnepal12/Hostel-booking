@@ -52,6 +52,10 @@ def update_hostel(hostel_id):
         return jsonify({"error": "Hostel not found"}), 404
 
     data = request.get_json()
+    if not data:
+        return jsonify({"error": "No input data provided"}), 400, 404
+
+    data = request.get_json()
     hostel.name = data.get("name", hostel.name)
     hostel.location = data.get("location", hostel.location)
     hostel.price_per_bed = data.get("price_per_bed", hostel.price_per_bed)
