@@ -5,6 +5,10 @@ from app.models.hostel import Hostel
 
 def create_hostel():
     data = request.get_json()
+
+    if not data or not data.get("name") or not data.get("location"):
+        return jsonify({"error": "Name and location are required"}), 400
+
     new_hostel = Hostel(
         name=data.get("name"),
         location=data.get("location"),
