@@ -1,6 +1,7 @@
 from flask import jsonify, request
 from app.extension import db
 from app.models.booking import Booking
+from app.models.room import Room
 from datetime import datetime
 
 
@@ -13,6 +14,13 @@ def create_booking():
     except (ValueError, TypeError):
         return jsonify({"error": "Invalid date format, use YYYY-MM-DD"}), 400
 
+    room = Room.query.get(data.get("room_id"))
+    if not room:
+        return jsonify({"error": "Room not found"}), 404
+
+    if not room.is_available:
+        return jsonify({"error": "Room is not available"}), 400
+
     new_booking = Booking(
         guest_name=data.get("guest_name"),
         guest_email=data.get("guest_email"),
@@ -21,6 +29,8 @@ def create_booking():
         status="pending",
         room_id=data.get("room_id")
     )
+
+    room.is_available = False
 
     db.session.add(new_booking)
     db.session.commit()
