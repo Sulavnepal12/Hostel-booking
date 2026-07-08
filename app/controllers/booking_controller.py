@@ -1,0 +1,60 @@
+from flask import jsonify, request
+from app.extension import db
+from app.models.booking import Booking
+from datetime import datetime
+
+
+def create_booking():
+    data = request.get_json()
+
+    try:
+        check_in = datetime.strptime(data.get("check_in"), "%Y-%m-%d").date()
+        check_out = datetime.strptime(data.get("check_out"), "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return jsonify({"error": "Invalid date format, use YYYY-MM-DD"}), 400
+
+    new_booking = Booking(
+        guest_name=data.get("guest_name"),
+        guest_email=data.get("guest_email"),
+        check_in=check_in,
+        check_out=check_out,
+        status="pending",
+        room_id=data.get("room_id")
+    )
+
+    db.session.add(new_booking)
+    db.session.commit()
+
+    return jsonify({"message": "Booking created successfully", "id": new_booking.id}), 201
+
+
+def get_all_bookings():
+    bookings = Booking.query.all()
+    result = []
+    for b in bookings:
+        result.append({
+            "id": b.id,
+            "guest_name": b.guest_name,
+            "guest_email": b.guest_email,
+            "check_in": b.check_in.isoformat(),
+            "check_out": b.check_out.isoformat(),
+            "status": b.status,
+            "room_id": b.room_id
+        })
+    return jsonify(result), 200
+
+
+def get_booking_by_id(booking_id):
+    booking = Booking.query.get(booking_id)
+    if not booking:
+        return jsonify({"error": "Booking not found"}), 404
+
+    return jsonify({
+        "id": booking.id,
+        "guest_name": booking.guest_name,
+        "guest_email": booking.guest_email,
+        "check_in": booking.check_in.isoformat(),
+        "check_out": booking.check_out.isoformat(),
+        "status": booking.status,
+        "room_id": booking.room_id
+    }), 200
