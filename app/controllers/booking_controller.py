@@ -68,3 +68,36 @@ def get_booking_by_id(booking_id):
         "status": booking.status,
         "room_id": booking.room_id
     }), 200
+
+
+def update_booking_status(booking_id):
+    booking = Booking.query.get(booking_id)
+    if not booking:
+        return jsonify({"error": "Booking not found"}), 404
+
+    data = request.get_json()
+    new_status = data.get("status")
+
+    if new_status not in ["pending", "confirmed", "cancelled"]:
+        return jsonify({"error": "Invalid status value"}), 400
+
+    booking.status = new_status
+    db.session.commit()
+
+    return jsonify({"message": "Booking status updated successfully", "status": booking.status}), 200
+
+
+def cancel_booking(booking_id):
+    booking = Booking.query.get(booking_id)
+    if not booking:
+        return jsonify({"error": "Booking not found"}), 404
+
+    booking.status = "cancelled"
+
+    room = Room.query.get(booking.room_id)
+    if room:
+        room.is_available = True
+
+    db.session.commit()
+
+    return jsonify({"message": "Booking cancelled successfully"}), 200
