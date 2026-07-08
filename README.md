@@ -1,12 +1,13 @@
-# Hostel-booking
-## API Endpoints
+# Hostel Booking System
 
-### Hostels
-- `POST /hostels` - Create a new hostel
-- `GET /hostels` - Get all hostels
-- `GET /hostels/<id>` - Get a single hostel by ID
+This is my Flask project for managing hostel bookings. I built this as a simple REST API where you can add hostels, add rooms to those hostels, and let guests book rooms. It also handles cancelling bookings and freeing up the room again.
 
-### Rooms
-- `POST /rooms` - Create a new room
-- `GET /rooms` - Get all rooms
-- `GET /rooms/<id>` - Get a single room by ID 
+## What I used
+- Python (Flask)
+- Flask-SQLAlchemy for the database
+- SQLite (just a local file, no need to install anything extra)
+
+# How to run it
+
+1. Clone this repo
+2. Make a virtual environment so packages don't mess with your system Python
