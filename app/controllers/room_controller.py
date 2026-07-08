@@ -5,6 +5,10 @@ from app.models.room import Room
 
 def create_room():
     data = request.get_json()
+
+    if not data or not data.get("room_number") or not data.get("hostel_id"):
+        return jsonify({"error": "Room number and hostel_id are required"}), 400
+
     new_room = Room(
         room_number=data.get("room_number"),
         room_type=data.get("room_type"),
