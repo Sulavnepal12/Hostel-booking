@@ -5,6 +5,11 @@ from app.controllers.booking_controller import create_booking, get_all_bookings,
 
 main_bp = Blueprint("main", __name__)
 
+def home():
+    return {"message": "Hostel Booking API is running"}, 200
+
+main_bp.route("/", methods=["GET"])(home)
+
 main_bp.route("/hostels", methods=["POST"])(create_hostel)
 main_bp.route("/hostels", methods=["GET"])(get_all_hostels)
 main_bp.route("/hostels/<int:hostel_id>", methods=["GET"])(get_hostel_by_id)
