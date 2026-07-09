@@ -3,6 +3,7 @@ from app.extension import db
 from app.models.hostel import Hostel
 from app.models.room import Room
 from app.models.booking import Booking
+from app.models.user import User
 
 app = create_app()
 
