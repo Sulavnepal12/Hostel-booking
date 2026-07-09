@@ -10,11 +10,29 @@
         <a href="/hostels-page">Hostels</a>
         <a href="/rooms-page">Rooms</a>
         <a href="/bookings-page">Bookings</a>
-        <a href="/login-page">Login</a>
-        <a href="/register-page">Register</a>
+        {% if session.get('username') %}
+            <a href="#" id="logoutLink">Logout</a>
+        {% else %}
+            <a href="/login-page">Login</a>
+            <a href="/register-page">Register</a>
+        {% endif %}
     </nav>
     <div class="container">
         {% block content %}{% endblock %}
     </div>
+
+    <script>
+    const logoutLink = document.getElementById("logoutLink");
+    if (logoutLink) {
+        logoutLink.addEventListener("click", function(e) {
+            e.preventDefault();
+            fetch("/logout", { method: "POST", credentials: "same-origin" })
+                .then(res => res.json())
+                .then(data => {
+                    window.location.href = "/";
+                });
+        });
+    }
+    </script>
 </body>
 </html>
