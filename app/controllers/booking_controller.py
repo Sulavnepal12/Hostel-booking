@@ -8,6 +8,9 @@ from datetime import datetime
 def create_booking():
     data = request.get_json()
 
+    if not data or not data.get("guest_name") or not data.get("room_id"):
+        return jsonify({"error": "Guest name and room_id are required"}), 400
+
     try:
         check_in = datetime.strptime(data.get("check_in"), "%Y-%m-%d").date()
         check_out = datetime.strptime(data.get("check_out"), "%Y-%m-%d").date()
