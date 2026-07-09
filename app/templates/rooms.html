@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Rooms</h1>
+<div id="roomList">Loading rooms...</div>
+
+<h2>Book a Room</h2>
+<form id="bookingForm">
+    <label>Room ID</label>
+    <input type="number" id="room_id" required>
+    <label>Guest Name</label>
+    <input type="text" id="guest_name" required>
+    <label>Guest Email</label>
+    <input type="email" id="guest_email">
+    <label>Check-in</label>
+    <input type="date" id="check_in" required>
+    <label>Check-out</label>
+    <input type="date" id="check_out" required>
+    <button type="submit">Book Room</button>
+</form>
+<p id="bookingMessage"></p>
+
+<script>
+fetch("/rooms")
+    .then(response => response.json())
+    .then(data => {
+        const container = document.getElementById("roomList");
+        if (data.length === 0) {
+            container.innerHTML = "<p>No rooms available yet.</p>";
+            return;
+        }
+        container.innerHTML = "";
+        data.forEach(room => {
+            const card = document.createElement("div");
+            card.className = "room-card";
+            card.innerHTML = `
+                <h3>Room ${room.room_number}</h3>
+                <p><strong>Type:</strong> ${room.room_type ?? "N/A"}</p>
+                <p><strong>Capacity:</strong> ${room.capacity ?? "N/A"}</p>
+                <p><strong>Available:</strong> ${room.is_available ? "Yes" : "No"}</p>
+                <p><strong>Hostel ID:</strong> ${room.hostel_id}</p>
+                <p><strong>Room ID:</strong> ${room.id}</p>
+            `;
+            container.appendChild(card);
+        });
+    })
+    .catch(err => {
+        document.getElementById("roomList").innerHTML = "<p>Failed to load rooms.</p>";
+        console.error(err);
+    });
+
+document.getElementById("bookingForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const payload = {
+        room_id: parseInt(document.getElementById("room_id").value),
+        guest_name: document.getElementById("guest_name").value,
+        guest_email: document.getElementById("guest_email").value,
+        check_in: document.getElementById("check_in").value,
+        check_out: document.getElementById("check_out").value
+    };
+
+    fetch("/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        credentials: "same-origin"
+    })
+    .then(response => response.json())
+    .then(data => {
+        const msg = document.getElementById("bookingMessage");
+        if (data.message) {
+            msg.className = "success";
+            msg.textContent = data.message + " (Booking ID: " + data.id + ")";
+        } else {
+            msg.className = "error";
+            msg.textContent = data.error;
+        }
+    });
+});
+</script>
+{% endblock %}

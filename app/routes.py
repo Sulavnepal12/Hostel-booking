@@ -9,7 +9,27 @@ main_bp = Blueprint("main", __name__)
 def home():
     return render_template("index.html")
 
+def login_page():
+    return render_template("login.html")
+
+def register_page():
+    return render_template("register.html")
+
+def hostels_page():
+    return render_template("hostels.html")
+
+def rooms_page():
+    return render_template("rooms.html")
+
+def bookings_page():
+    return render_template("bookings.html")
+
 main_bp.route("/", methods=["GET"])(home)
+main_bp.route("/login-page", methods=["GET"])(login_page)
+main_bp.route("/register-page", methods=["GET"])(register_page)
+main_bp.route("/hostels-page", methods=["GET"])(hostels_page)
+main_bp.route("/rooms-page", methods=["GET"])(rooms_page)
+main_bp.route("/bookings-page", methods=["GET"])(bookings_page)
 
 main_bp.route("/hostels", methods=["POST"])(create_hostel)
 main_bp.route("/hostels", methods=["GET"])(get_all_hostels)

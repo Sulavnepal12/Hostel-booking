@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Register</h1>
+<form id="registerForm">
+    <label>Username</label>
+    <input type="text" id="username" required>
+    <label>Password</label>
+    <input type="password" id="password" required>
+    <button type="submit">Register</button>
+</form>
+<p id="message"></p>
+<p>Already have an account? <a href="/login-page">Login here</a>.</p>
+
+<script>
+document.getElementById("registerForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    fetch("/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: username, password: password }),
+        credentials: "same-origin"
+    })
+    .then(response => response.json())
+    .then(data => {
+        const msg = document.getElementById("message");
+        if (data.message) {
+            msg.className = "success";
+            msg.textContent = data.message + " You can now log in.";
+            setTimeout(() => { window.location.href = "/login-page"; }, 1200);
+        } else {
+            msg.className = "error";
+            msg.textContent = data.error;
+        }
+    });
+});
+</script>
+{% endblock %}

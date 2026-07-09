@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Available Hostels</h1>
+<div id="hostelList">Loading hostels...</div>
+
+<script>
+fetch("/hostels")
+    .then(response => response.json())
+    .then(data => {
+        const container = document.getElementById("hostelList");
+        if (data.length === 0) {
+            container.innerHTML = "<p>No hostels available yet.</p>";
+            return;
+        }
+        container.innerHTML = "";
+        data.forEach(hostel => {
+            const card = document.createElement("div");
+            card.className = "hostel-card";
+            card.innerHTML = `
+                <h3>${hostel.name}</h3>
+                <p><strong>Location:</strong> ${hostel.location}</p>
+                <p><strong>Price per bed:</strong> Rs. ${hostel.price_per_bed ?? "N/A"}</p>
+                <p><strong>Total rooms:</strong> ${hostel.total_rooms}</p>
+                <p><strong>Amenities:</strong> ${hostel.amenities ?? "Not listed"}</p>
+            `;
+            container.appendChild(card);
+        });
+    })
+    .catch(err => {
+        document.getElementById("hostelList").innerHTML = "<p>Failed to load hostels.</p>";
+        console.error(err);
+    });
+</script>
+{% endblock %}

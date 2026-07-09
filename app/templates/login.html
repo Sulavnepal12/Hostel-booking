@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Login</h1>
+<form id="loginForm">
+    <label>Username</label>
+    <input type="text" id="username" required>
+    <label>Password</label>
+    <input type="password" id="password" required>
+    <button type="submit">Login</button>
+</form>
+<p id="message"></p>
+
+<script>
+document.getElementById("loginForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    fetch("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: username, password: password }),
+        credentials: "same-origin"
+    })
+    .then(response => response.json())
+    .then(data => {
+        const msg = document.getElementById("message");
+        if (data.message) {
+            msg.className = "success";
+            msg.textContent = data.message + " Redirecting...";
+            setTimeout(() => { window.location.href = "/"; }, 1000);
+        } else {
+            msg.className = "error";
+            msg.textContent = data.error;
+        }
+    });
+});
+</script>
+{% endblock %}

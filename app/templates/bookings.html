@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Bookings</h1>
+<div id="bookingList">Loading bookings...</div>
+
+<script>
+fetch("/bookings")
+    .then(response => response.json())
+    .then(data => {
+        const container = document.getElementById("bookingList");
+        if (data.length === 0) {
+            container.innerHTML = "<p>No bookings yet.</p>";
+            return;
+        }
+        container.innerHTML = "";
+        data.forEach(booking => {
+            const card = document.createElement("div");
+            card.className = "booking-card";
+            card.innerHTML = `
+                <h3>Booking #${booking.id}</h3>
+                <p><strong>Guest:</strong> ${booking.guest_name}</p>
+                <p><strong>Email:</strong> ${booking.guest_email ?? "N/A"}</p>
+                <p><strong>Check-in:</strong> ${booking.check_in}</p>
+                <p><strong>Check-out:</strong> ${booking.check_out}</p>
+                <p><strong>Status:</strong> ${booking.status}</p>
+                <p><strong>Room ID:</strong> ${booking.room_id}</p>
+                ${booking.status !== "cancelled" ? `<button onclick="cancelBooking(${booking.id})">Cancel</button>` : ""}
+            `;
+            container.appendChild(card);
+        });
+    })
+    .catch(err => {
+        document.getElementById("bookingList").innerHTML = "<p>Failed to load bookings.</p>";
+        console.error(err);
+    });
+
+function cancelBooking(id) {
+    fetch(`/bookings/${id}/cancel`, {
+        method: "PUT",
+        credentials: "same-origin"
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message || data.error);
+        window.location.reload();
+    });
+}
+</script>
+{% endblock %}
