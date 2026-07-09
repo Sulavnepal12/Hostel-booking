@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, render_template, session
 from app.controllers.hostel_controller import create_hostel, get_all_hostels, get_hostel_by_id, update_hostel, delete_hostel
 from app.controllers.room_controller import create_room, get_all_rooms, get_room_by_id, update_room, delete_room
 from app.controllers.booking_controller import create_booking, get_all_bookings, get_booking_by_id, update_booking_status, cancel_booking
@@ -7,7 +7,7 @@ from app.controllers.auth_controller import register, login, logout, check_sessi
 main_bp = Blueprint("main", __name__)
 
 def home():
-    return {"message": "Hostel Booking API is running"}, 200
+    return render_template("index.html")
 
 main_bp.route("/", methods=["GET"])(home)
 
