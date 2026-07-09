@@ -11,3 +11,9 @@ This is my Flask project for managing hostel bookings. I built this as a simple 
 
 1. Clone this repo
 2. Make a virtual environment so packages don't mess with your system Python
+
+## Auth 
+- POST /register → create a new user account
+- POST /login → log in (creates a session/cookie)
+- POST /logout → log out (clears the session)
+- GET /session → check if you're currently logged in
