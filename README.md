@@ -3,9 +3,10 @@
 This is my Flask project for managing hostel bookings. I built this as a simple REST API where you can add hostels, add rooms to those hostels, and let guests book rooms. It also handles cancelling bookings and freeing up the room again.
 
 ## What I used
+## What I used
 - Python (Flask)
 - Flask-SQLAlchemy for the database
-- SQLite (just a local file, no need to install anything extra)
+- MySQL as the database engine
 
 # How to run it
 
