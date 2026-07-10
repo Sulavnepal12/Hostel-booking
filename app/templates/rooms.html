@@ -23,6 +23,7 @@
 fetch("/rooms")
     .then(response => response.json())
     .then(data => {
+        data.sort((a, b) => parseInt(a.room_number) - parseInt(b.room_number));
         const container = document.getElementById("roomList");
         if (data.length === 0) {
             container.innerHTML = "<p>No rooms available yet.</p>";
