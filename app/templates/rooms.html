@@ -1,7 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Rooms</h1>
-<div id="roomList">Loading rooms...</div>
+<div id="roomList" class="room-grid">Loading rooms...</div>
+
+<h2>Add a Room</h2>
+<form id="addRoomForm">
+    <label>Room Number</label>
+    <input type="text" id="add_room_number" required>
+    <label>Room Type</label>
+    <input type="text" id="add_room_type" required>
+    <label>Capacity</label>
+    <input type="number" id="add_capacity" required>
+    <label>Hostel ID</label>
+    <input type="number" id="add_hostel_id" required>
+    <label>Room Photo</label>
+    <input type="file" id="add_image" accept="image/*">
+    <button type="submit">Add Room</button>
+</form>
+<p id="addRoomMessage"></p>
 
 <h2>Book a Room</h2>
 <form id="bookingForm">
@@ -20,34 +36,111 @@
 <p id="bookingMessage"></p>
 
 <script>
-fetch("/rooms")
+function loadRooms() {
+    fetch("/rooms")
+        .then(response => response.json())
+        .then(data => {
+            data.sort((a, b) => parseInt(a.room_number) - parseInt(b.room_number));
+            const container = document.getElementById("roomList");
+            if (data.length === 0) {
+                container.innerHTML = "<p>No rooms available yet.</p>";
+                return;
+            }
+            container.innerHTML = "";
+            data.forEach(room => {
+                const card = document.createElement("div");
+                card.className = "room-card";
+                const imageHtml = room.image_url
+                    ? `<img src="${room.image_url}" alt="Room ${room.room_number}" class="room-image" onerror="this.style.display='none'">`
+                    : `<div class="room-image-placeholder">No image yet</div>`;
+                card.innerHTML = `
+                    ${imageHtml}
+                    <h3>Room ${room.room_number}</h3>
+                    <p><strong>Type:</strong> ${room.room_type ?? "N/A"}</p>
+                    <p><strong>Capacity:</strong> ${room.capacity ?? "N/A"}</p>
+                    <p><strong>Available:</strong> ${room.is_available ? "Yes" : "No"}</p>
+                    <p><strong>Room ID:</strong> ${room.id}</p>
+                    <button onclick="triggerEditImage(${room.id})">Change Photo</button>
+                    <input type="file" id="editImage_${room.id}" accept="image/*" style="display:none" onchange="editRoomImage(${room.id})">
+                    <button onclick="deleteRoom(${room.id})">Delete</button>
+                `;
+                container.appendChild(card);
+            });
+        })
+        .catch(err => {
+            document.getElementById("roomList").innerHTML = "<p>Failed to load rooms.</p>";
+            console.error(err);
+        });
+}
+
+loadRooms();
+
+document.getElementById("addRoomForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("room_number", document.getElementById("add_room_number").value);
+    formData.append("room_type", document.getElementById("add_room_type").value);
+    formData.append("capacity", document.getElementById("add_capacity").value);
+    formData.append("hostel_id", document.getElementById("add_hostel_id").value);
+    const imageFile = document.getElementById("add_image").files[0];
+    if (imageFile) formData.append("image", imageFile);
+
+    fetch("/rooms", {
+        method: "POST",
+        body: formData,
+        credentials: "same-origin"
+    })
     .then(response => response.json())
     .then(data => {
-        data.sort((a, b) => parseInt(a.room_number) - parseInt(b.room_number));
-        const container = document.getElementById("roomList");
-        if (data.length === 0) {
-            container.innerHTML = "<p>No rooms available yet.</p>";
-            return;
+        const msg = document.getElementById("addRoomMessage");
+        if (data.message) {
+            msg.className = "success";
+            msg.textContent = data.message;
+            document.getElementById("addRoomForm").reset();
+            loadRooms();
+        } else {
+            msg.className = "error";
+            msg.textContent = data.error;
         }
-        container.innerHTML = "";
-        data.forEach(room => {
-            const card = document.createElement("div");
-            card.className = "room-card";
-            card.innerHTML = `
-                <h3>Room ${room.room_number}</h3>
-                <p><strong>Type:</strong> ${room.room_type ?? "N/A"}</p>
-                <p><strong>Capacity:</strong> ${room.capacity ?? "N/A"}</p>
-                <p><strong>Available:</strong> ${room.is_available ? "Yes" : "No"}</p>
-                <p><strong>Hostel ID:</strong> ${room.hostel_id}</p>
-                <p><strong>Room ID:</strong> ${room.id}</p>
-            `;
-            container.appendChild(card);
-        });
-    })
-    .catch(err => {
-        document.getElementById("roomList").innerHTML = "<p>Failed to load rooms.</p>";
-        console.error(err);
     });
+});
+
+function triggerEditImage(id) {
+    document.getElementById(`editImage_${id}`).click();
+}
+
+function editRoomImage(id) {
+    const fileInput = document.getElementById(`editImage_${id}`);
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    fetch(`/rooms/${id}`, {
+        method: "PUT",
+        body: formData,
+        credentials: "same-origin"
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message || data.error);
+        loadRooms();
+    });
+}
+
+function deleteRoom(id) {
+    if (!confirm("Are you sure you want to delete this room?")) return;
+    fetch(`/rooms/${id}`, {
+        method: "DELETE",
+        credentials: "same-origin"
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message || data.error);
+        loadRooms();
+    });
+}
 
 document.getElementById("bookingForm").addEventListener("submit", function(e) {
     e.preventDefault();
