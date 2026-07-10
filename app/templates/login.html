@@ -9,6 +9,7 @@
     <button type="submit">Login</button>
 </form>
 <p id="message"></p>
+<p>Don't have an account? <a href="/register-page">Register here</a>.</p>
 
 <script>
 document.getElementById("loginForm").addEventListener("submit", function(e) {
@@ -22,7 +23,12 @@ document.getElementById("loginForm").addEventListener("submit", function(e) {
         body: JSON.stringify({ username: username, password: password }),
         credentials: "same-origin"
     })
-    .then(response => response.json())
+    .then(response => {
+        if (response.status === 429) {
+            throw new Error("Too many login attempts. Please wait a minute and try again.");
+        }
+        return response.json();
+    })
     .then(data => {
         const msg = document.getElementById("message");
         if (data.message) {
@@ -33,6 +39,11 @@ document.getElementById("loginForm").addEventListener("submit", function(e) {
             msg.className = "error";
             msg.textContent = data.error;
         }
+    })
+    .catch(err => {
+        const msg = document.getElementById("message");
+        msg.className = "error";
+        msg.textContent = err.message;
     });
 });
 </script>
