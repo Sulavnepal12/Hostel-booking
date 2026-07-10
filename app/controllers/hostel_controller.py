@@ -5,16 +5,17 @@ from app.models.hostel import Hostel
 
 def create_hostel():
     data = request.get_json()
-
     if not data or not data.get("name") or not data.get("location"):
         return jsonify({"error": "Name and location are required"}), 400
-
     new_hostel = Hostel(
         name=data.get("name"),
         location=data.get("location"),
         price_per_bed=data.get("price_per_bed"),
         amenities=data.get("amenities"),
-        total_rooms=data.get("total_rooms", 0)
+        total_rooms=data.get("total_rooms", 0),
+        warden_name=data.get("warden_name"),
+        warden_phone=data.get("warden_phone"),
+        warden_email=data.get("warden_email")
     )
     db.session.add(new_hostel)
     db.session.commit()
@@ -31,7 +32,10 @@ def get_all_hostels():
             "location": h.location,
             "price_per_bed": h.price_per_bed,
             "amenities": h.amenities,
-            "total_rooms": h.total_rooms
+            "total_rooms": h.total_rooms,
+            "warden_name": h.warden_name,
+            "warden_phone": h.warden_phone,
+            "warden_email": h.warden_email
         })
     return jsonify(result), 200
 
@@ -46,7 +50,10 @@ def get_hostel_by_id(hostel_id):
         "location": hostel.location,
         "price_per_bed": hostel.price_per_bed,
         "amenities": hostel.amenities,
-        "total_rooms": hostel.total_rooms
+        "total_rooms": hostel.total_rooms,
+        "warden_name": hostel.warden_name,
+        "warden_phone": hostel.warden_phone,
+        "warden_email": hostel.warden_email
     }), 200
 
 
@@ -54,19 +61,18 @@ def update_hostel(hostel_id):
     hostel = Hostel.query.get(hostel_id)
     if not hostel:
         return jsonify({"error": "Hostel not found"}), 404
-
     data = request.get_json()
     if not data:
         return jsonify({"error": "No input data provided"}), 400
-
     hostel.name = data.get("name", hostel.name)
     hostel.location = data.get("location", hostel.location)
     hostel.price_per_bed = data.get("price_per_bed", hostel.price_per_bed)
     hostel.amenities = data.get("amenities", hostel.amenities)
     hostel.total_rooms = data.get("total_rooms", hostel.total_rooms)
-
+    hostel.warden_name = data.get("warden_name", hostel.warden_name)
+    hostel.warden_phone = data.get("warden_phone", hostel.warden_phone)
+    hostel.warden_email = data.get("warden_email", hostel.warden_email)
     db.session.commit()
-
     return jsonify({"message": "Hostel updated successfully", "id": hostel.id}), 200
 
 
@@ -74,8 +80,6 @@ def delete_hostel(hostel_id):
     hostel = Hostel.query.get(hostel_id)
     if not hostel:
         return jsonify({"error": "Hostel not found"}), 404
-
     db.session.delete(hostel)
     db.session.commit()
-
     return jsonify({"message": "Hostel deleted successfully"}), 200
