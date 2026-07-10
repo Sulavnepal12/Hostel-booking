@@ -15,6 +15,12 @@
     <input type="number" id="add_total_rooms">
     <label>Amenities</label>
     <input type="text" id="add_amenities">
+    <label>Warden Name</label>
+    <input type="text" id="add_warden_name">
+    <label>Warden Phone</label>
+    <input type="text" id="add_warden_phone">
+    <label>Warden Email</label>
+    <input type="email" id="add_warden_email">
     <button type="submit">Add Hostel</button>
 </form>
 <p id="addMessage"></p>
@@ -39,6 +45,12 @@ function loadHostels() {
                     <p><strong>Price per bed:</strong> Rs. ${hostel.price_per_bed ?? "N/A"}</p>
                     <p><strong>Total rooms:</strong> ${hostel.total_rooms}</p>
                     <p><strong>Amenities:</strong> ${hostel.amenities ?? "Not listed"}</p>
+                    <div class="warden-info">
+                        <strong>Warden Contact</strong>
+                        <p>${hostel.warden_name ?? "Not assigned"}</p>
+                        <p>${hostel.warden_phone ?? "N/A"}</p>
+                        <p>${hostel.warden_email ?? "N/A"}</p>
+                    </div>
                     <button onclick="editHostel(${hostel.id}, '${hostel.name}', '${hostel.location}', ${hostel.price_per_bed ?? 0}, ${hostel.total_rooms ?? 0}, '${hostel.amenities ?? ""}')">Edit</button>
                     <button onclick="deleteHostel(${hostel.id})">Delete</button>
                 `;
@@ -60,7 +72,10 @@ document.getElementById("addHostelForm").addEventListener("submit", function(e) 
         location: document.getElementById("add_location").value,
         price_per_bed: parseFloat(document.getElementById("add_price").value) || null,
         total_rooms: parseInt(document.getElementById("add_total_rooms").value) || 0,
-        amenities: document.getElementById("add_amenities").value
+        amenities: document.getElementById("add_amenities").value,
+        warden_name: document.getElementById("add_warden_name").value,
+        warden_phone: document.getElementById("add_warden_phone").value,
+        warden_email: document.getElementById("add_warden_email").value
     };
 
     fetch("/hostels", {

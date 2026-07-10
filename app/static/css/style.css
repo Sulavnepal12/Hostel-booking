@@ -196,3 +196,14 @@
     font-size: 0.9rem;
     color: #aaa;
 }
+.warden-info {
+    background: #f0f4ff;
+    border-left: 4px solid #003893;
+    padding: 10px 15px;
+    margin: 12px 0;
+    border-radius: 6px;
+}
+
+.warden-info strong {
+    color: #003893;
+}
