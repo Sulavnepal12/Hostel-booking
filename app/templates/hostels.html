@@ -3,32 +3,129 @@
 <h1>Available Hostels</h1>
 <div id="hostelList">Loading hostels...</div>
 
+<h2>Add a Hostel</h2>
+<form id="addHostelForm">
+    <label>Name</label>
+    <input type="text" id="add_name" required>
+    <label>Location</label>
+    <input type="text" id="add_location" required>
+    <label>Price per bed</label>
+    <input type="number" id="add_price">
+    <label>Total rooms</label>
+    <input type="number" id="add_total_rooms">
+    <label>Amenities</label>
+    <input type="text" id="add_amenities">
+    <button type="submit">Add Hostel</button>
+</form>
+<p id="addMessage"></p>
+
 <script>
-fetch("/hostels")
+function loadHostels() {
+    fetch("/hostels")
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById("hostelList");
+            if (data.length === 0) {
+                container.innerHTML = "<p>No hostels available yet.</p>";
+                return;
+            }
+            container.innerHTML = "";
+            data.forEach(hostel => {
+                const card = document.createElement("div");
+                card.className = "hostel-card";
+                card.innerHTML = `
+                    <h3>${hostel.name}</h3>
+                    <p><strong>Location:</strong> ${hostel.location}</p>
+                    <p><strong>Price per bed:</strong> Rs. ${hostel.price_per_bed ?? "N/A"}</p>
+                    <p><strong>Total rooms:</strong> ${hostel.total_rooms}</p>
+                    <p><strong>Amenities:</strong> ${hostel.amenities ?? "Not listed"}</p>
+                    <button onclick="editHostel(${hostel.id}, '${hostel.name}', '${hostel.location}', ${hostel.price_per_bed ?? 0}, ${hostel.total_rooms ?? 0}, '${hostel.amenities ?? ""}')">Edit</button>
+                    <button onclick="deleteHostel(${hostel.id})">Delete</button>
+                `;
+                container.appendChild(card);
+            });
+        })
+        .catch(err => {
+            document.getElementById("hostelList").innerHTML = "<p>Failed to load hostels.</p>";
+            console.error(err);
+        });
+}
+
+loadHostels();
+
+document.getElementById("addHostelForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const payload = {
+        name: document.getElementById("add_name").value,
+        location: document.getElementById("add_location").value,
+        price_per_bed: parseFloat(document.getElementById("add_price").value) || null,
+        total_rooms: parseInt(document.getElementById("add_total_rooms").value) || 0,
+        amenities: document.getElementById("add_amenities").value
+    };
+
+    fetch("/hostels", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        credentials: "same-origin"
+    })
     .then(response => response.json())
     .then(data => {
-        const container = document.getElementById("hostelList");
-        if (data.length === 0) {
-            container.innerHTML = "<p>No hostels available yet.</p>";
-            return;
+        const msg = document.getElementById("addMessage");
+        if (data.message) {
+            msg.className = "success";
+            msg.textContent = data.message;
+            document.getElementById("addHostelForm").reset();
+            loadHostels();
+        } else {
+            msg.className = "error";
+            msg.textContent = data.error;
         }
-        container.innerHTML = "";
-        data.forEach(hostel => {
-            const card = document.createElement("div");
-            card.className = "hostel-card";
-            card.innerHTML = `
-                <h3>${hostel.name}</h3>
-                <p><strong>Location:</strong> ${hostel.location}</p>
-                <p><strong>Price per bed:</strong> Rs. ${hostel.price_per_bed ?? "N/A"}</p>
-                <p><strong>Total rooms:</strong> ${hostel.total_rooms}</p>
-                <p><strong>Amenities:</strong> ${hostel.amenities ?? "Not listed"}</p>
-            `;
-            container.appendChild(card);
-        });
-    })
-    .catch(err => {
-        document.getElementById("hostelList").innerHTML = "<p>Failed to load hostels.</p>";
-        console.error(err);
     });
+});
+
+function editHostel(id, name, location, price, totalRooms, amenities) {
+    const newName = prompt("Name:", name);
+    if (newName === null) return;
+    const newLocation = prompt("Location:", location);
+    if (newLocation === null) return;
+    const newPrice = prompt("Price per bed:", price);
+    if (newPrice === null) return;
+    const newTotalRooms = prompt("Total rooms:", totalRooms);
+    if (newTotalRooms === null) return;
+    const newAmenities = prompt("Amenities:", amenities);
+    if (newAmenities === null) return;
+
+    fetch(`/hostels/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            name: newName,
+            location: newLocation,
+            price_per_bed: parseFloat(newPrice) || null,
+            total_rooms: parseInt(newTotalRooms) || 0,
+            amenities: newAmenities
+        }),
+        credentials: "same-origin"
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message || data.error);
+        loadHostels();
+    });
+}
+
+function deleteHostel(id) {
+    if (!confirm("Are you sure you want to delete this hostel?")) return;
+    fetch(`/hostels/${id}`, {
+        method: "DELETE",
+        credentials: "same-origin"
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message || data.error);
+        loadHostels();
+    });
+}
 </script>
 {% endblock %}
