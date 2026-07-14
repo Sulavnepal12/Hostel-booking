@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>My Activity</h1>
+<p>Bookings you have made while logged in.</p>
+<div id="myBookingsList">Loading your bookings...</div>
+
+<script>
+fetch("/my-bookings")
+    .then(response => {
+        if (response.status === 401) {
+            throw new Error("Please log in to view your activity.");
+        }
+        return response.json();
+    })
+    .then(data => {
+        const container = document.getElementById("myBookingsList");
+        if (data.length === 0) {
+            container.innerHTML = "<p>You haven't made any bookings yet.</p>";
+            return;
+        }
+        container.innerHTML = "";
+        data.forEach(booking => {
+            const card = document.createElement("div");
+            card.className = "booking-card";
+            card.innerHTML = `
+                <h3>Booking #${booking.id}</h3>
+                <p><strong>Guest:</strong> ${booking.guest_name}</p>
+                <p><strong>Check-in:</strong> ${booking.check_in}</p>
+                <p><strong>Check-out:</strong> ${booking.check_out}</p>
+                <p><strong>Status:</strong> ${booking.status}</p>
+                <p><strong>Room ID:</strong> ${booking.room_id}</p>
+            `;
+            container.appendChild(card);
+        });
+    })
+    .catch(err => {
+        document.getElementById("myBookingsList").innerHTML = `<p>${err.message}</p>`;
+    });
+</script>
+{% endblock %}

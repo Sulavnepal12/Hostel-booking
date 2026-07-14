@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Registered Users (Admin)</h1>
+<div id="userList">Loading users...</div>
+
+<script>
+function loadUsers() {
+    fetch("/users")
+        .then(response => {
+            if (response.status === 401) {
+                throw new Error("You must be logged in to view this page.");
+            }
+            return response.json();
+        })
+        .then(data => {
+            const container = document.getElementById("userList");
+            if (data.length === 0) {
+                container.innerHTML = "<p>No users found.</p>";
+                return;
+            }
+            container.innerHTML = "";
+            data.forEach(user => {
+                const card = document.createElement("div");
+                card.className = "user-card";
+                card.innerHTML = `
+                    <p><strong>ID:</strong> ${user.id}</p>
+                    <p><strong>Username:</strong> ${user.username}</p>
+                    <button onclick="deleteUser(${user.id})">Delete</button>
+                `;
+                container.appendChild(card);
+            });
+        })
+        .catch(err => {
+            document.getElementById("userList").innerHTML = `<p>${err.message}</p>`;
+        });
+}
+
+loadUsers();
+
+function deleteUser(id) {
+    if (!confirm("Are you sure you want to delete this user?")) return;
+    fetch(`/users/${id}`, {
+        method: "DELETE",
+        credentials: "same-origin"
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message || data.error);
+        loadUsers();
+    });
+}
+</script>
+{% endblock %}
