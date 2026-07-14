@@ -48,3 +48,29 @@ def check_session():
     if "user_id" in session:
         return jsonify({"logged_in": True, "username": session.get("username")}), 200
     return jsonify({"logged_in": False}), 200
+
+
+def get_all_users():
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized. Please log in."}), 401
+
+    users = User.query.all()
+    result = [{"id": u.id, "username": u.username} for u in users]
+    return jsonify(result), 200
+
+
+def delete_user(user_id):
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized. Please log in."}), 401
+
+    if session.get("user_id") == user_id:
+        return jsonify({"error": "You cannot delete your own account while logged in."}), 400
+
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    db.session.delete(user)
+    db.session.commit()
+
+    return jsonify({"message": "User deleted successfully"}), 200
