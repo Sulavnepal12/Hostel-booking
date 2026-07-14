@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import jsonify, request, session
 from app.extension import db
 from app.models.booking import Booking
 from app.models.room import Room
@@ -30,7 +30,8 @@ def create_booking():
         check_in=check_in,
         check_out=check_out,
         status="pending",
-        room_id=data.get("room_id")
+        room_id=data.get("room_id"),
+        user_id=session.get("user_id")
     )
 
     room.is_available = False
@@ -43,6 +44,26 @@ def create_booking():
 
 def get_all_bookings():
     bookings = Booking.query.all()
+    result = []
+    for b in bookings:
+        result.append({
+            "id": b.id,
+            "guest_name": b.guest_name,
+            "guest_email": b.guest_email,
+            "check_in": b.check_in.isoformat(),
+            "check_out": b.check_out.isoformat(),
+            "status": b.status,
+            "room_id": b.room_id,
+            "user_id": b.user_id
+        })
+    return jsonify(result), 200
+
+
+def get_my_bookings():
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized. Please log in."}), 401
+
+    bookings = Booking.query.filter_by(user_id=session.get("user_id")).all()
     result = []
     for b in bookings:
         result.append({
@@ -69,7 +90,8 @@ def get_booking_by_id(booking_id):
         "check_in": booking.check_in.isoformat(),
         "check_out": booking.check_out.isoformat(),
         "status": booking.status,
-        "room_id": booking.room_id
+        "room_id": booking.room_id,
+        "user_id": booking.user_id
     }), 200
 
 
